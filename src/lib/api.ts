@@ -1,3 +1,5 @@
+import type { ApiResponse } from './types'
+
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
 type ApiOptions = RequestInit & {
@@ -6,25 +8,68 @@ type ApiOptions = RequestInit & {
 
 export async function apiFetch<T>(path: string, options: ApiOptions = {}) {
   const { parseJson = true, headers, ...rest } = options
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      'Content-Type': 'application/json',
+  const url = `${API_BASE_URL}${path}`
+
+  try {
+    const method = (rest.method ?? 'GET').toUpperCase()
+    const hasBody = Boolean(rest.body)
+    const computedHeaders: Record<string, string> = {
       ...headers,
-    },
-    credentials: 'include',
-    ...rest,
-  })
+    }
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(errorText || `Request failed with ${response.status}`)
+    // Only set JSON content-type when sending a body to avoid preflight on simple GETs
+    if (hasBody && !computedHeaders['Content-Type']) {
+      computedHeaders['Content-Type'] = 'application/json'
+    }
+
+    const response = await fetch(url, {
+      method,
+      headers: computedHeaders,
+      credentials: 'include',
+      ...rest,
+    })
+
+    if (!response.ok) {
+      let errorMessage = `Request failed with ${response.status}`
+      try {
+        const errorText = await response.text()
+        if (errorText) {
+          try {
+            const errorJson = JSON.parse(errorText)
+            errorMessage = errorJson.message || errorText
+          } catch {
+            errorMessage = errorText
+          }
+        }
+      } catch {
+        // Use default error message
+      }
+
+      if (response.status === 404) {
+        errorMessage = `Not found: ${path}. Make sure the backend server is running at ${API_BASE_URL}`
+      } else if (response.status === 0 || response.status === 500) {
+        errorMessage = `Cannot connect to API at ${API_BASE_URL}. Is the backend server running?`
+      }
+
+      throw new Error(errorMessage)
+    }
+
+    if (!parseJson) {
+      return null as T
+    }
+
+    const body = (await response.json()) as ApiResponse<T>
+    if (!body.success) {
+      throw new Error(body.message || 'Request failed')
+    }
+
+    return body.data
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error(`Network error: Cannot reach API at ${API_BASE_URL}. Make sure the backend server is running.`)
+    }
+    throw error
   }
-
-  if (!parseJson) {
-    return null as T
-  }
-
-  return (await response.json()) as T
 }
 
 export { API_BASE_URL }

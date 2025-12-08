@@ -3,13 +3,20 @@ export type Song = {
   title: string
   artist: string
   key?: string
+  bpm?: number
+  difficulty?: 'easy' | 'medium' | 'hard'
   tags?: string[]
+  content?: string
+  isPublished?: boolean
+  createdAt?: string
+  updatedAt?: string
 }
 
-export type SongDetail = Song & {
-  lyrics?: string
-  chords?: string
-  content?: string
+export type SongListResponse = {
+  items: Song[]
+  total: number
+  page: number
+  limit: number
 }
 
 export type User = {
@@ -17,4 +24,17 @@ export type User = {
   name: string
   email: string
 }
+
+export type ApiSuccess<T> = {
+  success: true
+  data: T
+  message?: string
+}
+
+export type ApiError = {
+  success: false
+  message?: string
+}
+
+export type ApiResponse<T> = ApiSuccess<T> | ApiError
 
