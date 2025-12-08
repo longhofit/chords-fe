@@ -1,0 +1,187 @@
+---
+alwaysApply: true
+---
+# Architecture & Folder Structure
+
+## Recommended structure
+
+- `src/main.tsx` – application entry point
+- `src/App.tsx` – top-level app layout and routing
+- `src/features/<feature>/`
+  - `components/` – feature-specific components
+  - `hooks/` – feature-specific hooks (e.g. `useSongs`, `useAuth`)
+  - `types/` – TypeScript types/interfaces for the feature
+  - `api.ts` – feature-specific API calls (or hooks wrapping API calls)
+- `src/components/` – shared UI components (buttons, layouts, modals, etc.)
+- `src/routes/` or `src/pages/` – route-level components if separated
+- `src/lib/` – helpers, utilities, config
+
+## Separation of Concerns
+
+- **UI components** (presentational) should:
+
+  - Receive data via props
+  - Contain minimal logic (formatting, simple conditions)
+  - Not directly call APIs
+
+- **Containers / screens / route components** should:
+
+  - Use hooks to fetch data and manage state
+  - Compose presentational components
+  - Handle navigation and user interactions
+
+- **Hooks / services** should:
+
+  - Encapsulate data fetching and complex state
+  - Talk to the API layer
+  - Hide implementation details from components
+
+---
+
+# State Management & Data Fetching
+
+- Prefer **React local state** (`useState`, `useReducer`) for local UI concerns.
+- Use **React Query or similar** for server state if it is part of the project:
+
+  - Wrap the app in a `QueryClientProvider` if React Query is used.
+  - Use `useQuery` for fetching lists/details.
+  - Use `useMutation` for create/update/delete operations.
+  - Derive UI states (`isLoading`, `isError`, `data`) directly from hooks.
+
+- Avoid introducing a heavy global state manager (Redux, Zustand, etc.) unless there is a clear need.
+
+- All data fetching should go through a centralized API layer, e.g.:
+
+  - `src/lib/api.ts` – axios/fetch instance with base URL and interceptors
+  - Feature-level API wrapper files (e.g. `features/songs/api.ts`)
+
+---
+
+# API & Type Safety Rules
+
+- Define TypeScript types/interfaces for:
+
+  - API request payloads
+  - API response data
+  - Core domain entities (e.g. `User`, `Song`, `Favorite`)
+
+- Use a centralized API client:
+
+  - Configure `baseURL` (e.g. from `import.meta.env.VITE_API_URL`).
+  - Attach auth tokens (e.g. JWT) via headers or interceptors.
+  - Handle generic errors (e.g. network issues, 401/403) in one place where possible.
+
+- Do not hardcode API URLs throughout the codebase. Keep them in a single configuration or feature-level API modules.
+
+- Handle API errors explicitly in UI:
+
+  - Show meaningful error messages.
+  - Provide retry options where appropriate.
+  - Do not expose raw technical error messages directly to end users.
+
+---
+
+# Routing Rules
+
+- Use **React Router** (or framework’s built-in router if using Next.js).
+
+- Organize routes logically:
+
+  - Public routes (e.g. home, login, register).
+  - Protected routes (e.g. favorites, profile).
+
+- Implement a simple protection mechanism for authenticated routes:
+
+  - Redirect unauthenticated users to login.
+  - Show a loading state while auth status is being determined.
+
+- Keep route components focused on:
+
+  - Getting route params
+  - Calling hooks
+  - Composing feature components
+
+---
+
+# Styling & UI Rules
+
+- Keep styling **consistent**:
+
+  - Prefer a single styling approach (e.g. Tailwind CSS, CSS Modules, or a UI library).
+  - Avoid mixing many styling systems without reason.
+
+- Ensure **responsive design**:
+
+  - Pages should be usable on both desktop and mobile browsers.
+  - Test basic layouts for common screen sizes.
+
+- Accessibility:
+
+  - Use semantic HTML elements where possible.
+  - Ensure key interactive elements have accessible labels.
+  - Do not rely solely on color to convey important information.
+
+---
+
+# Error Handling & Loading States
+
+- Every data-fetching view should handle:
+
+  - Loading state (e.g. spinner, skeleton, or inline loader).
+  - Error state with a clear message and, if possible, a retry action.
+  - Empty state when there is no data.
+
+- Do not silently swallow errors; handle them in UI or log them appropriately (without leaking sensitive details).
+
+---
+
+# Testing Rules
+
+- Use **Jest** and **React Testing Library** (or equivalent) for testing.
+
+- Focus tests on:
+
+  - Critical flows (auth, navigation, main data displays).
+  - Important components and hooks.
+  - Edge cases (no data, error states).
+
+- Tests should be deterministic and not rely on real backend services:
+
+  - Mock API calls or use MSW (Mock Service Worker) where appropriate.
+
+---
+
+# AI / Code Generation Rules
+
+When generating or modifying code in this React project:
+
+- Follow the existing folder structure and naming conventions.
+- Use TypeScript types/interfaces for component props and API data.
+- Keep components small and focused; extract reusable pieces into `src/components` when they are shared.
+- Do not place raw API calls directly inside deeply nested components; prefer hooks or dedicated API modules.
+- Always handle loading and error states for data-fetching components.
+- For new features:
+
+  - Create a feature folder under `src/features/<featureName>/`.
+  - Add components, hooks, and types inside that feature folder.
+  - Wire feature into routing and navigation in `App.tsx` or the routing module.
+
+- Prefer clarity and maintainability over clever one-liners or over-abstracted patterns.
+
+---
+
+# AI Compliance Verification Rule
+
+For every **conversational response** (chat-style answer) inside this project, the AI MUST:
+
+- Start the response with the exact phrase: `Hi sir`
+- This rule applies ONLY to natural language responses to the user (e.g. explanations, documentation, comments in the chat).
+- This rule MUST NOT be applied to:
+  - Source code
+  - JSON payloads
+  - API responses
+  - Logs
+  - Test snapshots
+  - Documentation files created for the app itself
+
+If a conversational response does not start with `Hi sir`, it means the AI is NOT correctly respecting the project rules and memory bank.
