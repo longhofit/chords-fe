@@ -1,6 +1,8 @@
 import type { ApiResponse } from './types'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+// Backend now serves APIs under /api; set default accordingly.
+// Override with VITE_API_URL if needed (e.g., for production).
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
 
 type ApiOptions = RequestInit & {
   parseJson?: boolean
