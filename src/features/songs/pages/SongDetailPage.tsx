@@ -54,6 +54,42 @@ function SongDetailPage() {
     )
   }
 
+  // Format content to highlight chords in square brackets
+  const formatContent = (content: string) => {
+    if (!content) return 'No chord sheet yet.'
+
+    // Split by lines to preserve line breaks
+    const lines = content.split('\n')
+
+    return lines.map((line, lineIndex) => {
+      // Match chords in square brackets like [Am], [F], [Dm], etc.
+      const parts = line.split(/(\[[^\]]+\])/g)
+
+      return (
+        <div key={lineIndex} style={{ marginBottom: '0.5rem', lineHeight: '1.8' }}>
+          {parts.map((part, partIndex) => {
+            if (part.startsWith('[') && part.endsWith(']')) {
+              // This is a chord - display in red
+              return (
+                <span
+                  key={partIndex}
+                  style={{
+                    color: '#ef4444',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {part}
+                </span>
+              )
+            }
+            // Regular text
+            return <span key={partIndex}>{part}</span>
+          })}
+        </div>
+      )
+    })
+  }
+
   return (
     <section className="page">
       <div className="section">
@@ -64,9 +100,20 @@ function SongDetailPage() {
       </div>
       <div className="section">
         <h2>Chords & Lyrics</h2>
-        <pre className="kbd" style={{ whiteSpace: 'pre-wrap' }}>
-          {song.content ?? 'No chord sheet yet.'}
-        </pre>
+        <div
+          style={{
+            padding: '1.5rem',
+            background: 'rgba(226, 232, 240, 0.02)',
+            border: '1px solid rgba(226, 232, 240, 0.06)',
+            borderRadius: '12px',
+            color: '#e2e8f0',
+            fontSize: '1.1rem',
+            lineHeight: '1.8',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {formatContent(song.content ?? '')}
+        </div>
       </div>
     </section>
   )

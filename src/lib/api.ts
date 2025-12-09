@@ -16,7 +16,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}) {
     const method = (rest.method ?? 'GET').toUpperCase()
     const hasBody = Boolean(rest.body)
     const computedHeaders: Record<string, string> = {
-      ...headers,
+      ...(headers as Record<string, string>),
     }
 
     // Only set JSON content-type when sending a body to avoid preflight on simple GETs

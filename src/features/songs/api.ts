@@ -13,6 +13,15 @@ export type ListSongsParams = {
   sortOrder?: 'asc' | 'desc'
 }
 
+export type CreateSongParams = {
+  title: string
+  artist: string
+  key?: string
+  tags?: string[]
+  content: string
+  isPublished?: boolean
+}
+
 export async function fetchSongs(params: ListSongsParams = {}) {
   const searchParams = new URLSearchParams()
   if (params.page) searchParams.set('page', String(params.page))
@@ -35,3 +44,9 @@ export async function fetchSong(id: string) {
   return apiFetch<Song>(`/songs/${id}`)
 }
 
+export async function createSong(params: CreateSongParams) {
+  return apiFetch<Song>('/songs', {
+    method: 'POST',
+    body: JSON.stringify(params),
+  })
+}

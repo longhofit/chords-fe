@@ -48,7 +48,12 @@ function SongListPage() {
   return (
     <section className="page">
       <div className="section">
-        <h1>Song Library</h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+          <h1 style={{ margin: 0 }}>Song Library</h1>
+          <Link to="/songs/new" className="button" style={{ textDecoration: 'none' }}>
+            + Create Song
+          </Link>
+        </div>
         <p className="muted">
           Search songs and open a chord sheet. Data will connect to the API
           soon.
