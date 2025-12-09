@@ -143,6 +143,31 @@
   box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35);
 }
 
+/* Variants */
+.button-secondary {
+  background: rgba(226, 232, 240, 0.08);
+  color: #e2e8f0;
+  border-color: rgba(226, 232, 240, 0.14);
+  box-shadow: none;
+}
+
+.button-secondary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(148, 163, 184, 0.12);
+}
+
+.button-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35);
+}
+
+.button-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(239, 68, 68, 0.45);
+}
+
 .section {
   display: flex;
   flex-direction: column;

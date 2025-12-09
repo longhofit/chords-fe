@@ -22,6 +22,8 @@ export type CreateSongParams = {
   isPublished?: boolean
 }
 
+export type UpdateSongParams = Partial<CreateSongParams>
+
 export async function fetchSongs(params: ListSongsParams = {}) {
   const searchParams = new URLSearchParams()
   if (params.page) searchParams.set('page', String(params.page))
@@ -48,5 +50,19 @@ export async function createSong(params: CreateSongParams) {
   return apiFetch<Song>('/songs', {
     method: 'POST',
     body: JSON.stringify(params),
+  })
+}
+
+export async function updateSong(id: string, params: UpdateSongParams) {
+  return apiFetch<Song>(`/songs/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(params),
+  })
+}
+
+export async function deleteSong(id: string) {
+  return apiFetch<null>(`/songs/${id}`, {
+    method: 'DELETE',
+    parseJson: false,
   })
 }

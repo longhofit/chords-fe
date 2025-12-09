@@ -1,7 +1,7 @@
 import type { ApiResponse } from './types'
 
-// Backend now serves APIs under /api; set default accordingly.
-// Override with VITE_API_URL if needed (e.g., for production).
+// Default base URL: backend serves APIs under /api
+// Override with VITE_API_URL if needed (production or different host)
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api'
 
 type ApiOptions = RequestInit & {
@@ -19,7 +19,6 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}) {
       ...(headers as Record<string, string>),
     }
 
-    // Only set JSON content-type when sending a body to avoid preflight on simple GETs
     if (hasBody && !computedHeaders['Content-Type']) {
       computedHeaders['Content-Type'] = 'application/json'
     }
@@ -44,7 +43,7 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}) {
           }
         }
       } catch {
-        // Use default error message
+        // keep default errorMessage
       }
 
       if (response.status === 404) {
@@ -75,4 +74,3 @@ export async function apiFetch<T>(path: string, options: ApiOptions = {}) {
 }
 
 export { API_BASE_URL }
-

@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { fetchSong } from '../api'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { deleteSong, fetchSong } from '../api'
 import type { Song } from '../../../lib/types'
 
 function SongDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [song, setSong] = useState<Song | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -90,13 +92,47 @@ function SongDetailPage() {
     })
   }
 
+  const handleDelete = async () => {
+    if (!id) return
+    const confirmed = window.confirm('Delete this song? This cannot be undone.')
+    if (!confirmed) return
+
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteSong(id)
+      navigate('/')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete song')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   return (
     <section className="page">
-      <div className="section">
-        <h1>{song.title}</h1>
-        <p className="muted">
-          {song.artist} · Key {song.key}
-        </p>
+      <div className="section" style={{ gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <h1 style={{ margin: 0 }}>{song.title}</h1>
+            <p className="muted" style={{ margin: 0 }}>
+              {song.artist} {song.key ? `· Key ${song.key}` : ''}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Link to={`/songs/${song.id}/edit`} className="button button-secondary" style={{ textDecoration: 'none' }}>
+              Edit
+            </Link>
+            <button
+              type="button"
+              className="button button-danger"
+              onClick={handleDelete}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
       </div>
       <div className="section">
         <h2>Chords & Lyrics</h2>

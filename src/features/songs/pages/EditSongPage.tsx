@@ -1,14 +1,18 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { createSong } from '../api'
-import type { CreateSongParams } from '../api'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { fetchSong, updateSong, deleteSong } from '../api'
+import type { Song } from '../../../lib/types'
+import type { UpdateSongParams } from '../api'
 
-function CreateSongPage() {
+function EditSongPage() {
+  const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const [formData, setFormData] = useState<CreateSongParams>({
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [formData, setFormData] = useState<UpdateSongParams>({
     title: '',
     artist: '',
     key: '',
@@ -16,36 +20,68 @@ function CreateSongPage() {
     content: '',
     isPublished: true,
   })
-
   const [tagInput, setTagInput] = useState('')
+
+  useEffect(() => {
+    if (!id) return
+    let canceled = false
+
+    setLoading(true)
+    setError(null)
+    fetchSong(id)
+      .then((data: Song) => {
+        if (canceled) return
+        setFormData({
+          title: data.title,
+          artist: data.artist,
+          key: data.key ?? '',
+          tags: data.tags ?? [],
+          content: data.content ?? '',
+          isPublished: data.isPublished ?? true,
+        })
+      })
+      .catch((err) => {
+        if (canceled) return
+        setError(err instanceof Error ? err.message : 'Failed to load song')
+      })
+      .finally(() => {
+        if (canceled) return
+        setLoading(false)
+      })
+
+    return () => {
+      canceled = true
+    }
+  }, [id])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    if (!id) return
+
+    setSaving(true)
     setError(null)
 
     try {
-      // Clean up the data
-      const songData: CreateSongParams = {
-        title: formData.title.trim(),
-        artist: formData.artist.trim(),
-        content: formData.content.trim(),
+      const payload: UpdateSongParams = {
+        title: formData.title?.trim(),
+        artist: formData.artist?.trim(),
+        content: formData.content?.trim(),
         isPublished: formData.isPublished,
       }
 
       if (formData.key?.trim()) {
-        songData.key = formData.key.trim()
+        payload.key = formData.key.trim()
       }
       if (formData.tags && formData.tags.length > 0) {
-        songData.tags = formData.tags
+        payload.tags = formData.tags
       }
 
-      const createdSong = await createSong(songData)
-      navigate(`/songs/${createdSong.id}`)
+      const updated = await updateSong(id, payload)
+      navigate(`/songs/${updated.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create song')
+      setError(err instanceof Error ? err.message : 'Failed to update song')
     } finally {
-      setLoading(false)
+      setSaving(false)
     }
   }
 
@@ -67,12 +103,67 @@ function CreateSongPage() {
     })
   }
 
+  const handleDelete = async () => {
+    if (!id) return
+    const confirmed = window.confirm('Delete this song? This cannot be undone.')
+    if (!confirmed) return
+
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteSong(id)
+      navigate('/')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete song')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="page">
+        <p className="muted">Loading song...</p>
+      </section>
+    )
+  }
+
+  if (error && !formData.title) {
+    return (
+      <section className="page">
+        <div
+          style={{
+            padding: '1rem',
+            background: 'rgba(239, 68, 68, 0.1)',
+            borderRadius: '8px',
+          }}
+        >
+          <p style={{ color: '#ef4444', margin: 0 }}>
+            <strong>Error:</strong> {error}
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="page">
-      <div className="section">
-        <h1>Create New Song</h1>
+      <div className="section" style={{ gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <h1>Edit Song</h1>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button
+              type="button"
+              className="button button-danger"
+              onClick={handleDelete}
+              disabled={deleting || saving}
+            >
+              {deleting ? 'Deleting...' : 'Delete'}
+            </button>
+          </div>
+        </div>
         <p className="muted">
-          Fill in the song details and add chords with lyrics. Format: Put each chord on its own line, followed by the lyrics on the next line.
+          Update song details and inline chords. Chords are written in square brackets within lyrics.
         </p>
 
         {error && (
@@ -81,7 +172,6 @@ function CreateSongPage() {
               padding: '1rem',
               background: 'rgba(239, 68, 68, 0.1)',
               borderRadius: '8px',
-              marginBottom: '1rem',
             }}
           >
             <p style={{ color: '#ef4444', margin: 0 }}>
@@ -100,7 +190,7 @@ function CreateSongPage() {
               className="input"
               type="text"
               required
-              value={formData.title}
+              value={formData.title || ''}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Song title"
             />
@@ -115,7 +205,7 @@ function CreateSongPage() {
               className="input"
               type="text"
               required
-              value={formData.artist}
+              value={formData.artist || ''}
               onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
               placeholder="Artist name"
             />
@@ -224,7 +314,7 @@ Phố buồn đêm linh [Am] lan!`}
               className="input"
               required
               rows={20}
-              value={formData.content}
+              value={formData.content || ''}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
               placeholder="Ối sáng nay Đông [Am] về&#10;Đèn vàng sân ga [F] nhớ&#10;Nghe miên man hơi [Dm] thở"
               style={{
@@ -239,7 +329,7 @@ Phố buồn đêm linh [Am] lan!`}
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <input
                 type="checkbox"
-                checked={formData.isPublished}
+                checked={Boolean(formData.isPublished)}
                 onChange={(e) =>
                   setFormData({ ...formData, isPublished: e.target.checked })
                 }
@@ -249,14 +339,14 @@ Phố buồn đêm linh [Am] lan!`}
           </div>
 
           <div className="section" style={{ display: 'flex', gap: '1rem' }}>
-            <button type="submit" className="button" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Song'}
+            <button type="submit" className="button" disabled={saving || deleting}>
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
             <button
               type="button"
             className="button button-secondary"
               onClick={() => navigate(-1)}
-              disabled={loading}
+              disabled={saving || deleting}
             >
               Cancel
             </button>
@@ -267,5 +357,5 @@ Phố buồn đêm linh [Am] lan!`}
   )
 }
 
-export default CreateSongPage
+export default EditSongPage
 
