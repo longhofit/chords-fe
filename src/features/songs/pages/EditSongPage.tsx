@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { fetchSong, updateSong, deleteSong } from '../api'
+import { useToast } from '../../../components/ToastProvider'
+import { ConfirmModal } from '../../../components/ConfirmModal'
 import type { Song } from '../../../lib/types'
 import type { UpdateSongParams } from '../api'
 
 function EditSongPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -21,6 +24,7 @@ function EditSongPage() {
     isPublished: true,
   })
   const [tagInput, setTagInput] = useState('')
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -77,9 +81,12 @@ function EditSongPage() {
       }
 
       const updated = await updateSong(id, payload)
+      showSuccess('Song updated')
       navigate(`/songs/${updated.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update song')
+      const message = err instanceof Error ? err.message : 'Failed to update song'
+      setError(message)
+      showError(message)
     } finally {
       setSaving(false)
     }
@@ -105,18 +112,20 @@ function EditSongPage() {
 
   const handleDelete = async () => {
     if (!id) return
-    const confirmed = window.confirm('Delete this song? This cannot be undone.')
-    if (!confirmed) return
 
     setDeleting(true)
     setError(null)
     try {
       await deleteSong(id)
+      showSuccess('Song deleted')
       navigate('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete song')
+      const message = err instanceof Error ? err.message : 'Failed to delete song'
+      setError(message)
+      showError(message)
     } finally {
       setDeleting(false)
+      setConfirmOpen(false)
     }
   }
 
@@ -155,7 +164,7 @@ function EditSongPage() {
             <button
               type="button"
               className="button button-danger"
-              onClick={handleDelete}
+              onClick={() => setConfirmOpen(true)}
               disabled={deleting || saving}
             >
               {deleting ? 'Deleting...' : 'Delete'}
@@ -351,7 +360,17 @@ Phố buồn đêm linh [Am] lan!`}
               Cancel
             </button>
           </div>
-        </form>
+      </form>
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete song?"
+        description="This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => !deleting && setConfirmOpen(false)}
+      />
       </div>
     </section>
   )

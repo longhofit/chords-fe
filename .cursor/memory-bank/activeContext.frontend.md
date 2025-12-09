@@ -1,24 +1,31 @@
 # Active Context – Chord Web App Frontend
 
 ## Current Phase
-- Initial MVP implementation for the React frontend.
+- MVP build; songs feature wired to backend.
 
 ## Current Focus Area
-- Setting up the React project and base architecture.
-- Implementing auth flow and basic navigation.
+- Songs CRUD (list, detail, create, edit, delete) with inline chord display.
+- UI polish for buttons and dark theme content panels.
 
-## Recently Completed (example, update as you go)
-- [ ] React project created (with TypeScript)
-- [ ] Routing set up (React Router or Next.js pages)
-- [ ] Basic layout (header, main content, footer)
-- [ ] API client helper (base URL, auth token handling)
-- [ ] Login page wired to backend
-- [ ] Song list page using mock or real data
-- [ ] Song detail page (static or connected)
+## Recently Completed
+- [x] Routing set up (React Router)
+- [x] Base layout (header, main content, footer)
+- [x] API client helper (apiFetch) and songs API wrappers
+- [x] Song list page with search (local state) and navigation
+- [x] Song detail page with inline chord highlighting ([chord])
+- [x] Create song page (inline chord format, tags, publish toggle)
+- [x] Edit song page with save + delete actions
+- [x] Delete song action with confirmation
+- [x] Button variants (primary/secondary/danger) applied to song pages
 
 ## Next Steps (High-Level)
-- Connect song list and detail pages to real backend endpoints.
-- Implement favorites page and favorite/unfavorite actions.
-- Implement search + filters (title, artist, key, tag) with URL sync.
-- Improve loading and error states for all main pages.
-- Add minimal tests (component tests for key pages and hooks).
+- Add toasts for create/edit/delete success and errors; replace window.confirm with a modal.
+- Refresh list after edit/delete; improve loading skeletons/empty states.
+- Add auth integration and favorites flow.
+- Add minimal tests for songs CRUD + chord rendering.
+
+## Next Steps / Plan (Short-Term)
+- UX polish: add toast notifications for success/error; replace delete confirm with a modal; add skeletons/empty states.
+- Data sync: refresh song list after edit/delete; ensure navigation after delete returns home.
+- Auth/favorites: wire login/register/profile; add favorites page and actions.
+- Quality: basic tests for songs CRUD and chord rendering; consider key dropdown suggestions.

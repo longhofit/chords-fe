@@ -2,27 +2,28 @@
 
 ## Status Overview
 - Phase: MVP build
-- Overall health: In progress
+- Overall health: In progress; songs CRUD functional, auth/favorites pending.
 
-## Completed Work (update continuously)
-- [ ] Setup React + TypeScript project
-- [ ] Choose and configure router (React Router or Next.js routing)
-- [ ] Set up base layout (header, content, footer)
-- [ ] Implement login & register UI
-- [ ] Integrate auth with backend (login, profile fetch)
-- [ ] Implement songs list page with backend integration
-- [ ] Implement song detail page with chords display
-- [ ] Implement favorites page and actions
-- [ ] Add basic responsive design
-- [ ] Add basic tests for critical flows
+## Completed Work
+- [x] Setup React + TypeScript project
+- [x] Configure React Router routing
+- [x] Base layout (header, content, footer)
+- [ ] Login & register UI
+- [ ] Auth integration (login/profile)
+- [x] Songs list page (backend integration, search)
+- [x] Song detail page with inline chord display ([chord])
+- [x] Create song page (inline chords, tags, publish toggle)
+- [x] Edit song page with save + delete
+- [x] Delete song action with confirmation
+- [x] Button variants (primary/secondary/danger) and dark panels
+- [ ] Favorites page/actions
+- [ ] Basic responsive design
+- [ ] Basic tests for critical flows
 
 ## Known Issues / Risks
-- [ ] Decide final auth handling strategy (cookies vs localStorage)
-- [ ] Ensure proper error handling for network/API failures
-- [ ] Optimize rendering of long content (lyrics with chords)
+- [ ] Decide auth handling (cookies vs localStorage)
+- [ ] Add toasts/modals for better UX; current delete uses confirm
+- [ ] Optimize rendering of long chord sheets; add skeletons/empty states
 
-## Progress Log (example)
-- YYYY-MM-DD – Frontend project initialized; routing and layout created.
-- YYYY-MM-DD – Auth flow implemented; user can log in and see profile.
-- YYYY-MM-DD – Songs list and detail pages connected to backend.
-- YYYY-MM-DD – Favorites page implemented and basic responsive UI added.
+## Progress Log
+- 2025-12-09 – Songs CRUD hooked to backend; inline chord format adopted; edit/delete added; UI buttons themed.

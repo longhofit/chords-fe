@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createSong } from '../api'
+import { useToast } from '../../../components/ToastProvider'
 import type { CreateSongParams } from '../api'
 
 function CreateSongPage() {
   const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,9 +43,12 @@ function CreateSongPage() {
       }
 
       const createdSong = await createSong(songData)
+      showSuccess('Song created')
       navigate(`/songs/${createdSong.id}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create song')
+      const message = err instanceof Error ? err.message : 'Failed to create song'
+      setError(message)
+      showError(message)
     } finally {
       setLoading(false)
     }

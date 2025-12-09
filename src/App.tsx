@@ -8,21 +8,24 @@ import EditSongPage from './features/songs/pages/EditSongPage'
 import SongDetailPage from './features/songs/pages/SongDetailPage'
 import SongListPage from './features/songs/pages/SongListPage'
 import './App.css'
+import { ToastProvider } from './components/ToastProvider'
 
 function App() {
   return (
-    <AppLayout>
-      <Routes>
-        <Route path="/" element={<SongListPage />} />
-        <Route path="/songs/new" element={<CreateSongPage />} />
-        <Route path="/songs/:id/edit" element={<EditSongPage />} />
-        <Route path="/songs/:id" element={<SongDetailPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </AppLayout>
+    <ToastProvider>
+      <AppLayout>
+        <Routes>
+          <Route path="/" element={<SongListPage />} />
+          <Route path="/songs/new" element={<CreateSongPage />} />
+          <Route path="/songs/:id/edit" element={<EditSongPage />} />
+          <Route path="/songs/:id" element={<SongDetailPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AppLayout>
+    </ToastProvider>
   )
 }
 

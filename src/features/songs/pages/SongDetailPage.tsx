@@ -1,15 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { deleteSong, fetchSong } from '../api'
+import { useToast } from '../../../components/ToastProvider'
+import { ConfirmModal } from '../../../components/ConfirmModal'
 import type { Song } from '../../../lib/types'
 
 function SongDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { showSuccess, showError } = useToast()
   const [song, setSong] = useState<Song | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -94,18 +98,19 @@ function SongDetailPage() {
 
   const handleDelete = async () => {
     if (!id) return
-    const confirmed = window.confirm('Delete this song? This cannot be undone.')
-    if (!confirmed) return
-
     setDeleting(true)
     setError(null)
     try {
       await deleteSong(id)
+      showSuccess('Song deleted')
       navigate('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete song')
+      const message = err instanceof Error ? err.message : 'Failed to delete song'
+      setError(message)
+      showError(message)
     } finally {
       setDeleting(false)
+      setConfirmOpen(false)
     }
   }
 
@@ -126,7 +131,7 @@ function SongDetailPage() {
             <button
               type="button"
               className="button button-danger"
-              onClick={handleDelete}
+              onClick={() => setConfirmOpen(true)}
               disabled={deleting}
             >
               {deleting ? 'Deleting...' : 'Delete'}
@@ -151,6 +156,16 @@ function SongDetailPage() {
           {formatContent(song.content ?? '')}
         </div>
       </div>
+      <ConfirmModal
+        open={confirmOpen}
+        title="Delete song?"
+        description="This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => !deleting && setConfirmOpen(false)}
+      />
     </section>
   )
 }
